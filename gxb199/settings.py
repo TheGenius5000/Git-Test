@@ -59,7 +59,7 @@ ROOT_URLCONF = 'gxb199.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'writer/templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
