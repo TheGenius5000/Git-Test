@@ -1,9 +1,11 @@
-<html>
+{% extends "base.html" %}
+{% block content %}
     <header>
         <title>GitWriter!</title>
     </header>
     <body>
         <h1>Going well so far!</h1>
-        <p>{{ today }}</p>
+        <p>Opened on {{ today }}</p>
+        <a href="{% url 'writer.list' %}" class="btn btn-primary">Click! It doesn't do anything!</a>
     </body>
-</html>
+{% endblock %}
