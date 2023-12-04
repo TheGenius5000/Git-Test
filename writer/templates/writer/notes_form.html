@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form action="{% url 'writer.new' %}" method="POST">
+    <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary my-5">Submit</button>
@@ -11,4 +11,5 @@
         {{ form.errors.title.as_text }}
         </div>
     {% endif %}
+
 {% endblock %}

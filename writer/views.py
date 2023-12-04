@@ -1,20 +1,28 @@
 from django.shortcuts import render
 from django.http import Http404
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
+from django.views.generic.edit import DeleteView
 from .models import Notes
-from.forms import WriterForm
+from .forms import WriterForm
+
 
 # Create your views here.
+
+class WriterDeleteView(DeleteView):
+    model = Notes
+    success_url = '/smart/writer'
 
 class WriterUpdateView(UpdateView):
     model = Notes
     success_url = '/smart/writer'
-    template_name = "writer/write-form.html"
+    form_class = WriterForm
+
+
 class WriterCreateView(CreateView):
     model = Notes
     success_url = '/smart/writer'
-    template_name = "writer/write-form.html"
     form_class = WriterForm
+
 
 class WriterListView(ListView):
     model = Notes

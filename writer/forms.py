@@ -13,7 +13,7 @@ class WriterForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'class': 'form-control mb-5'}),
 
         }
-        labels ={
+        labels = {
             'text': 'Write comments for commits'
 
         }
