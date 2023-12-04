@@ -6,4 +6,5 @@
     </div>
     <a href="{% url 'writer.list' %}" class="btn btn-secondary my-5">Back</a>
     <a href="{% url 'writer.update' pk=note.id %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'writer.delete' pk=note.id %}" class="btn btn-danger">Delete</a>
 {% endblock %}
