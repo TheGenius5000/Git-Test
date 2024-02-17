@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h1 class="align-center md-5">{{ repository.name }}</h1>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+    <div class="d-flex flex-column align-items-start p-2">
+        <a class="btn btn-primary btn-lg mb-3" href="{% url 'git-test.view_commit_history' pk=repository.id branch=branch %}">Commit History</a>
+        <div class="d-flex justify-content-center gap-lg-5 mb-4">
+            <div class="d-flex justify-content-between flex-column">
+                <h3 class="mb-3"><b>Switch branch:</b></h3>
+                <form class="mb-4" method="POST">
+                    {% csrf_token %}
+                    {{ switch_branch_form.as_p }}
+                    <button type="submit" name="branch-switch" class="btn btn-primary">Checkout</button>
+                </form>
+            </div>
+             <div class="d-flex justify-content-between flex-column ">
+                <h3 class="mb-3"><b>New branch:</b></h3>
+                <form class="mb-4" method="POST">
+                    {% csrf_token %}
+                    {{ new_branch_form.as_p }}
+                    <button type="submit" name="branch-branch" class="btn btn-primary">Create</button>
+                </form>
+            </div>
+        </div>
+        <h5 class="alert alert-info p-2 mb-4">Most recent commit: {{ latest_commit.message }}</h5>
+        <div class="d-flex justify-content-between gap-lg-5 mb-4">
+            <h3 class="mb-3">Current branch is: <b>{{ repository.active_branch }}</b></h3>
+        </div>
+        <div class="d-flex align-center align-items-center mb-4 gap-lg-5">
+            <h3>Create New File:</h3>
+            <form class="mb-4" method="POST">
+                {% csrf_token %}
+                {{ new_file_form.as_p }}
+                <button type="submit" name="file-new" class="btn btn-primary">New File</button>
+            </form>
+        </div>
+        <div class="d-flex justify-content-between align-items-center gap-lg-5 mb-4">
+            <h3><b>Files:</b></h3>
+            <h3>/{{ curr_directory|as_directory }}</h3>
+            <a href='{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir='home' %}' class="btn btn-primary">Home folder</a>
+            <a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir=curr_directory %}?goback" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+
+
+    <table class="table">
+        <tr>
+            <th>File type</th>
+            <th>Name</th>
+            <th>Last commit</th>
+            <th>Size</th>
+            <th>Date</th>
+        </tr>
+        {% for entry in folder %}
+            <tr>
+                {% if entry.is_folder %}
+                    <td>Folder</td>
+                {% else %}
+                    {% if entry.name|length > 1 %}
+                        <td>{{ entry.name.1 }}</td>
+                    {% else %}
+                        <td>N/A</td>
+                    {% endif %}
+                {% endif %}
+                {% if entry.is_folder %}
+                    <td><a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir=curr_directory|addstr:'|'|addstr:entry.name.0 %}">{{ entry.name.0 }}</a></td>
+                {% else %}
+                    <td>{{ entry.name.0 }}</td>
+                {% endif %}
+
+                <td>{{ entry.latest_commit_name }}</td>
+                <td>{{ entry.size }}</td>
+                <td>{{ entry.date|unix_to_datetime|timesince }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="md-5"></div>
+    <div>
+        {% if repository.untracked_files or untracked_changes %}
+            <div class="d-flex flex-column p-2 mb-4 alert alert-warning">
+                <h3>You have some untracked files & changes. You can add them to the staging area by clicking 'Add' below.</h3>
+
+                <p>(Path shown are from home directory)</p>
+                <div class="text-start">
+        {#            <ul class="list-group">#}
+        {#                {% for filename in repository.untracked_files %}#}
+        {#                    <li class="list-group-item list-group-item-warning">{{ filename }}</li>#}
+        {#                {% endfor %}#}
+        {#            </ul>#}
+                    {% if repository.untracked_files %}
+                        <h5>New Files:</h5>
+                        <form class="mb-4" method="post">
+                            {% csrf_token %}
+                            {{ untracked_files_form.as_p }}
+                            <button type="submit" name="files-new-add" class="btn btn-primary">Add</button>
+                        </form>
+                    {% endif %}
+                    {% if untracked_changes %}
+                        <h5>Modified Files:</h5>
+
+                        <form class="mb-4" method="post">
+                            {% csrf_token %}
+                            {{ untracked_changes_form.as_p }}
+                            <button type="submit" name="files-changed-add" class="btn btn-primary">Add</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        {% if new_staged_files %}
+            <div class="alert alert-primary">
+                <div class="d-flex align-items-center flex-column p-2 mb-4">
+                    <h3>The following files are staged and ready for commit:</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ commit_changes_form.as_p }}
+                        <button type="submit" name="commit" class="btn btn-success">Commit</button>
+                    </form>
+                </div>
+                <strong>There is no stashing at the moment, you'll have to commit these changes on this branch or not be able to switch branches.</strong>
+                <p>(Absolute paths)</p>
+                <ul class="list-group">
+                    {% for staged_file in new_staged_files %}
+                        <li class="list-group-item">{{ staged_file }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="my-5">Your repositories:</h1>
+
+    <div class="row row-cols3 g-2">
+        {% for repository in repositories %}
+            <div class="col">
+                <div class="p-3 border">
+                    <a href="{% url 'git-test.detail' pk=repository.id %}" class="text-dark text-decoration-non">
+                        <h3>{{ repository.name }}</h3>
+                    </a>
+                </div>
+            </div>
+
+        {% empty %}
+            <p>Nothing to see here!</p> <a href="{% url 'git-test.new' %}">Consider making a repository</a>
+        {% endfor %}
+    <div class="d-flex justify-content-center">
+        <a class="btn btn-primary w-auto" href={% url 'git-test.new' %}>Create</a>
+    </div>
+    </div>
+
+{% endblock %}

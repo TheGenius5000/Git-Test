@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),
     path('smart/', include('writer.urls')),
+    path('git_test/', include('TalkingWithGit.urls'))
 ]
