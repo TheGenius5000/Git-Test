@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+        <h1 class="align-center md-5">{{ repository.name }}</h1>
+        <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+        <h2 class="d-flex justify-content-start mb-4">Branch Name:&nbsp;<b> {{ branch }}</b></h2>
+        <div class="d-flex justify-content-between mb-4">
+            <h3>Commit History:</h3>
+             <a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir='home' %}" class="btn btn-primary mb-4">Back</a>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary my-5">Submit</button>
+            </form>
+        </div>
+    <table class="table">
+        <tr>
+            <th>Commit name</th>
+            <th>Author</th>
+            <th>Commit date</th>
+        </tr>
+        {% for commit in commits %}
+            <tr>
+                <td>{{ commit.message }}</td>
+                <td>{{ commit.author.name }}</td>
+                <td>{{ commit.committed_date|unix_to_datetime }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

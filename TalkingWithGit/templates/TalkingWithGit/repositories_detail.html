@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="border round">
+        <h1 class="my-5">{{ repository.title }}</h1>
+        <h2 class="my-5">Collaborators:</h2>
+        <ul>
+            <li><b>{{ repository.owner }}</b></li>
+            {% for collaborator in repository.collaborators.all %}
+                <li>{{ collaborator }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <a href="{% url 'git-test.view_folder' pk=repository.id branch='main' relative_dir='home' %}" class="btn btn-primary">View git repository</a>
+
+    <a href="{% url 'git-test.list' %}" class="btn btn-secondary my-5">Back</a>
+    <a href="{% url 'git-test.update' pk=repository.id %}" class="btn btn-secondary">Edit</a>
+    <a href="{% url 'git-test.delete' pk=repository.id %}" class="btn btn-danger">Delete</a>
+{% endblock %}

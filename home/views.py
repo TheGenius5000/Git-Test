@@ -21,6 +21,7 @@ class SignupView(CreateView):
             return redirect('writer.list')
         return super().get(self, request, *args, **kwargs)
 
+
 class LogoutInterfaceView(LogoutView):
     template_name = "home/logout.html"
 

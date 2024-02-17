@@ -42,6 +42,7 @@ class WriterListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return self.request.user.notes.all()
 
+
 class WriterDetailView(DetailView):
     model = Notes
     context_object_name = "note"
