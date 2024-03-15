@@ -4,14 +4,14 @@
 {% block content %}
         <h1 class="align-center md-5">{{ repository.name }}</h1>
         <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+        <a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir='home' %}" class="btn btn-primary mb-4">Back</a>
         <h2 class="d-flex justify-content-start mb-4">Branch Name:&nbsp;<b> {{ branch }}</b></h2>
-        <div class="d-flex justify-content-between mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>Commit History:</h3>
-             <a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir='home' %}" class="btn btn-primary mb-4">Back</a>
             <form method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary my-5">Submit</button>
+                {{ switch_branch_form.as_p }}
+                <button type="submit" name="branch-switch" class="btn btn-primary my-5">Checkout</button>
             </form>
         </div>
     <table class="table">
@@ -19,12 +19,16 @@
             <th>Commit name</th>
             <th>Author</th>
             <th>Commit date</th>
+            <th>View the tree at this commit</th>
+            <th>Select to Compare</th>
         </tr>
-        {% for commit in commits %}
-            <tr>
-                <td>{{ commit.message }}</td>
+        {% for commit in commits reversed %}
+            <tr {% if commit.merge %} class="table-success" {% endif %}>
+                <td>{{ commit.msg }}</td>
                 <td>{{ commit.author.name }}</td>
-                <td>{{ commit.committed_date|unix_to_datetime }}</td>
+                <td>{{ commit.committer_date }}</td>
+                <td><a href="{% url 'git-test.view_folder' pk=repository.id branch=commit.hash relative_dir='home' %}?headless" class="btn btn-primary">View</a></td>
+                <td><a href="{% url 'git-test.compare_select_commit2' pk=repository.id branch=branch commit1hash=commit.hash %}" class="btn btn-primary">Compare to...</a></td>
             </tr>
         {% endfor %}
     </table>

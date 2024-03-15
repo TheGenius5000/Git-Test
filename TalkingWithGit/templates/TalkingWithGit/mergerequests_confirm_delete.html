@@ -3,7 +3,7 @@
 {% block content %}
     <form method="POST">
         {% csrf_token %}
-        <p>Are you sure you want to remove <u>"{{ repositories.name }}"</u>? </p>
+        <p>Are you sure you want to remove <u>"{{ merge_request.name }}"</u>? </p>
         <strong>You can't undo this.</strong>
         <input type="submit" class="btn btn-danger" value="Confirm">
     </form>

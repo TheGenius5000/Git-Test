@@ -10,7 +10,8 @@
             {% endfor %}
         </ul>
     </div>
-    <a href="{% url 'git-test.view_folder' pk=repository.id branch='main' relative_dir='home' %}" class="btn btn-primary">View git repository</a>
+    <a href="{% url 'git-test.view_folder' pk=repository.id branch=repository.active_branch.name relative_dir='home' %}" class="btn btn-primary">View git repository</a>
+    <a class="btn btn-primary" href="{% url 'git-test.merge_request_create' repo_pk=repository.id %}">Create Merge Request</a>
 
     <a href="{% url 'git-test.list' %}" class="btn btn-secondary my-5">Back</a>
     <a href="{% url 'git-test.update' pk=repository.id %}" class="btn btn-secondary">Edit</a>

@@ -15,6 +15,7 @@
                     <button type="submit" name="branch-switch" class="btn btn-primary">Checkout</button>
                 </form>
             </div>
+
              <div class="d-flex justify-content-between flex-column ">
                 <h3 class="mb-3"><b>New branch:</b></h3>
                 <form class="mb-4" method="POST">
@@ -23,17 +24,94 @@
                     <button type="submit" name="branch-branch" class="btn btn-primary">Create</button>
                 </form>
             </div>
+            <div class="d-flex align-items-center flex-column ">
+                <a class="btn btn-primary btn-lg" href="{% url 'git-test.merge_request_create' repo_pk=repository.id %}">Create Merge Request</a>
+            </div>
+            <div class="d-flex align-items-center flex-column ">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="delete-branch" class="btn btn-danger btn-lg">Delete This Branch</button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center flex-column">
+                <h3 class="mb-3"><b>Compare Branches</b></h3>
+                <form class="mb-4" method="post">
+                    {% csrf_token %}
+                    {{ compare_branch_form.as_p }}
+                    <button type="submit" name="branch-compare" class="btn btn-primary">Compare</button>
+                </form>
+            </div>
         </div>
         <h5 class="alert alert-info p-2 mb-4">Most recent commit: {{ latest_commit.message }}</h5>
-        <div class="d-flex justify-content-between gap-lg-5 mb-4">
-            <h3 class="mb-3">Current branch is: <b>{{ repository.active_branch }}</b></h3>
-        </div>
-        <div class="d-flex align-center align-items-center mb-4 gap-lg-5">
+        {% if not headless %}
+            <div class="d-flex justify-content-between gap-lg-5 mb-4">
+                <h3 class="mb-3">Current branch is: <b>{{ branch }}</b></h3>
+            </div>
+        {% else %}
+            <div class="d-flex justify-content-between gap-lg-5 mb-4 alert alert-info">
+                <h5 class="mb-3">Viewing a headless commit: <b>{{ commit_message }}</b></h5>
+            </div>
+        {% endif %}
+        {% if merge_requests %}
+            <div class="alert alert-warning p-2 mb-4">
+                <h5>There are merge requests that are open:</h5>
+                <table class="table">
+                    <tr>
+                        <th>Name</th>
+                        <th>Source branch</th>
+                        <th>Destination branch</th>
+                        <th></th>
+                    </tr>
+                    {% for merge_request in merge_requests %}
+                        <tr>
+                            <td>{{ merge_request.name }}</td>
+                            <td>{{ merge_request.branch_source }}</td>
+                            <td>{{ merge_request.branch_dest }}</td>
+                            <td><a href="{% url 'git-test.merge_request_detail' repo_pk=repository.id pk=merge_request.id %}" class="btn btn-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+        {% if stash_data and not headless  %}
+            <h3>Stashes:</h3>
+            <table class="table">
+                <tr>
+                    <th>Index</th>
+                    <th>Origin branch</th>
+                    <th>Message</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                {% for entry in stash_data %}
+                    <tr class="table-info">
+                        <td>{{ entry.0 }}</td>
+                        <td>{{ entry.1 }}</td>
+                        <td>{{ entry.2 }}</td>
+                        <td><form method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-success" name="stash-apply-{{ forloop.counter0 }}">Pop &amp; Apply</button>
+                        </form></td>
+                        <td><form method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-danger" name="stash-drop-{{ forloop.counter0 }}">Delete</button>
+                        </form></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+        <div class="d-flex flex-row align-center align-items-center mb-4 gap-lg-5">
             <h3>Create New File:</h3>
             <form class="mb-4" method="POST">
                 {% csrf_token %}
                 {{ new_file_form.as_p }}
                 <button type="submit" name="file-new" class="btn btn-primary">New File</button>
+            </form>
+            <h3>Upload New File:</h3>
+            <form class="mb-4 d-flex flex-column align-items-center align-self-center" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ upload_file_form.as_p }}
+                <button type="submit" name="file-upload" class="btn btn-primary">Upload</button>
             </form>
         </div>
         <div class="d-flex justify-content-between align-items-center gap-lg-5 mb-4">
@@ -51,7 +129,7 @@
             <th>Name</th>
             <th>Last commit</th>
             <th>Size</th>
-            <th>Date</th>
+            <th>Date last committed</th>
         </tr>
         {% for entry in folder %}
             <tr>
@@ -67,7 +145,13 @@
                 {% if entry.is_folder %}
                     <td><a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir=curr_directory|addstr:'|'|addstr:entry.name.0 %}">{{ entry.name.0 }}</a></td>
                 {% else %}
-                    <td>{{ entry.name.0 }}</td>
+                    <td>
+                        {% if entry.name|length > 1 %}
+                            <a href="{% url 'git-test.edit_file' pk=repository.id branch=branch relative_dir=curr_directory filename=entry.name.0|addstr:'.'|addstr:entry.name.1 %}">
+                        {% else %}
+                            <a href="{% url 'git-test.edit_file' pk=repository.id branch=branch relative_dir=curr_directory filename=entry.name.0 %}">
+                        {% endif %}
+                    {{ entry.name.0 }}</a></td>
                 {% endif %}
 
                 <td>{{ entry.latest_commit_name }}</td>
@@ -78,6 +162,7 @@
     </table>
     <div class="md-5"></div>
     <div>
+        {% if not headless %}
         {% if repository.untracked_files or untracked_changes %}
             <div class="d-flex flex-column p-2 mb-4 alert alert-warning">
                 <h3>You have some untracked files & changes. You can add them to the staging area by clicking 'Add' below.</h3>
@@ -109,25 +194,32 @@
                 </div>
             </div>
         {% endif %}
+        {% endif %}
         {% if new_staged_files %}
             <div class="alert alert-primary">
                 <div class="d-flex align-items-center flex-column p-2 mb-4">
                     <h3>The following files are staged and ready for commit:</h3>
-                    <form method="post">
+                    <form method="post" class="d-flex flex-row gap-lg-1">
                         {% csrf_token %}
                         {{ commit_changes_form.as_p }}
-                        <button type="submit" name="commit" class="btn btn-success">Commit</button>
+                        <button type="submit" name="commit" class="btn btn-success mb-2">Commit</button>
+                    </form>
+                    <form method="post" class="d-flex flex-row gap-lg-1">
+                        {% csrf_token %}
+                        {{ stash_changes_form.as_p }}
+                        <button type="submit" name="stash-save" class="btn btn-primary">Stash</button>
                     </form>
                 </div>
-                <strong>There is no stashing at the moment, you'll have to commit these changes on this branch or not be able to switch branches.</strong>
+{#                <strong>There is no stashing at the moment, you'll have to commit these changes on this branch or not be able to switch branches.</strong>#}
                 <p>(Absolute paths)</p>
                 <ul class="list-group">
                     {% for staged_file in new_staged_files %}
-                        <li class="list-group-item">{{ staged_file }}</li>
+                        <li class="list-group-item"><a href="{% url 'git-test.edit_file' pk=repository.id branch=branch relative_dir=staged_file|filename_to_path filename=staged_file|file_in_path %}">{{ staged_file }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
 
         {% endif %}
+        <a href="{% url 'git-test.merge_request_history' pk=repository.id %}" class="btn btn-primary">View Previous Merge Requests</a>
     </div>
 {% endblock %}

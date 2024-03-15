@@ -14,11 +14,12 @@ from django.shortcuts import redirect
 class SignupView(CreateView):
     form_class = UserCreationForm
     template_name = 'home/register.html'
-    success_url = '/smart/writer'
+    success_url = 'git_test/repositories'
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
-            return redirect('writer.list')
+            print("authenticated!")
+            return redirect('home')
         return super().get(self, request, *args, **kwargs)
 
 
@@ -38,3 +39,7 @@ class HomeView(TemplateView):
 class AuthorisedView(LoginRequiredMixin, TemplateView):
     template_name = 'home/authorised.html'
     login_url = '/admin'
+
+
+class InfoView(TemplateView):
+    template_name = 'home/info.html'

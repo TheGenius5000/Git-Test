@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h1 class="align-center mb-3">{{ repository.name }}</h1>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary">Detail</a>
+    <a href="{% url 'git-test.view_folder' pk=repository.id branch=branch relative_dir=relative_dir %}" class="btn btn-primary">Back</a>
+    <div class="d-flex flex-column justify-content-between mt-4 mb-4 gap-2">
+        <h4><b>Edit:</b></h4>
+        <form method="post">
+            {% csrf_token %}
+            {{ file_edit_form.media }}
+            {{ file_edit_form.as_p }}
+            <button type="submit" name="edit-save" class="btn btn-primary">Save</button>
+        </form>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="edit-delete" class="btn btn-danger">Delete <strong>WARNING: can't be undone!</strong></button>
+        </form>
+    </div>
+{% endblock %}

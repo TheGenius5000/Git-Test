@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="align-center md-5">{{ repository.name }}</h1>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+    <h2><b>Name: </b>{{ merge_request.name }}</h2>
+    <div class="d-flex flex-row justify-content-around">
+        <h3>From: <b>{{ merge_request.branch_source }}</b></h3>
+        <h3>To: <b>{{ merge_request.branch_dest }}</b></h3>
+    </div>
+    {% if diff %}
+        <div class="alert alert-info">
+            <p>{{ diff }}</p>
+        </div>
+    {% endif %}
+    <div class="d-flex flex-row justify-content-center gap-lg-1">
+        <a href="{% url 'git-test.merge_request_detail' repo_pk=merge_request.repository.id pk=merge_request.id %}?trymerge" class="btn btn-lg btn-info">Try Merge</a>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="merge" class="btn btn-success btn-lg">Merge</button>
+        </form>
+    </div>
+    <a href="{% url 'git-test.detail' pk=merge_request.repository.id %}" class="btn btn-secondary my-5">Back</a>
+    <a href="{% url 'git-test.merge_request_delete' repo_pk=merge_request.repository.id pk=merge_request.id %}" class="btn btn-danger">Delete</a>
+{% endblock %}

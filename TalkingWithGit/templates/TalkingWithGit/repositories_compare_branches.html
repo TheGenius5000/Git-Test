@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h1 class="align-center mb-3">{{ repository.name }}</h1>
+    <h2>Changes Between:</h2>
+    <h3>From: <b>{{ branch1 }}</b></h3>
+    <h3>To: <b>{{ branch2 }}</b></h3>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-3">Detail</a>
+    <a href="{% url 'git-test.view_folder' pk=repository.id branch=repository.active_branch.name relative_dir='home' %}" class="btn btn-primary mb-3">Back</a><br>
+    <a class="btn btn-primary btn-lg mb-3" href="{% url 'git-test.compare_branches' pk=repository.id branch1=branch2 branch2=branch1 %}">Swap</a>
+    {% if diff %}
+        <table class="table my-4">
+        <tr>
+            <th>Type</th>
+            <th>File</th>
+            <th>In {{ branch1 }}</th>
+            <th>In {{ branch2 }}</th>
+        </tr>
+        {% for diff in diffs %}
+            {% if diff.a_blob == None %}
+                <tr class="table-success">
+                    <td>New File</td>
+                    <td>{{ diff.a_path }}</td>
+                    <td>&#10008;</td><td>&#10004;</td>
+            {% elif diff.b_blob == None %}
+                <tr class="table-danger">
+                    <td>Doesn't Exist</td>
+                    <td>{{ diff.b_path }}</td>
+                    <td>&#10004;</td><td>&#10008;</td>
+            {% elif diff.a_blob != diff.b_blob %}
+                <tr class="table-warning">
+                    <td>Different contents <br><strong>May cause Merge Conflict!</strong></td>
+                    <td>{{ diff.a_path }}</td>
+                    <td>&#10004;</td><td>&#10004;</td>
+            {% endif %}</tr>
+        {% endfor %}
+    {% else %}
+        <p>Nothing here. The branches are identical. Are you sure that you did not select the same branch?</p>
+    {% endif %}
+    </table>
+{% endblock %}

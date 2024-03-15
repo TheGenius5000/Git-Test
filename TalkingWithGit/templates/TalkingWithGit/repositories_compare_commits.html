@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h1 class="align-center mb-3">{{ repository.name }}</h1>
+    <h2>Changes Timeline</h2>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+    <a href="{% url 'git-test.view_commit_history' pk=repository.id branch=branch %}" class="btn btn-primary mb-4">Back</a>
+    <h5>From: <b>{{ commits.0.msg }}</b></h5>
+    <h5>To: <b>{% with commits|last as last %}{{ last.msg }}{% endwith %}</b></h5>
+    <table class="table my-4">
+    <tr>
+        <th>Type</th>
+        <th>File</th>
+        <th>Author</th>
+        <th>Date</th>
+    </tr>
+    {% for commit in commits reversed %}
+        {% if commit != commits.0 %}
+            {% for modified_file in commit.modified_files %}
+                {% if modified_file.change_type.name == 'ADD' %}
+                    <tr class="table-success">
+                        <td>Add</td>
+                        <td>{{ modified_file.new_path }}</td>
+                        <td>{{ commit.author.name }}</td>
+                {% elif modified_file.change_type.name == 'MODIFY' %}
+                    <tr class="table-info">
+                        <td>Modify</td>
+                        <td>{{ modified_file.new_path }}</td>
+                        <td>{{ commit.author.name }}</td>
+                {% elif modified_file.change_type.name == 'DELETE' %}
+                    <tr class="table-danger">
+                        <td>Delete</td>
+                        <td>{{ modified_file.old_path}}</td>
+                        <td>{{ commit.author.name }}</td>
+                {% elif modified_file.change_type.name == 'RENAME' %}
+                    <tr class="table-primary">
+                        <td>Rename</td>
+                        <td>{{ modified_file.old_path }} to {{ modified_file.new_path }}</td>
+                        <td>{{ commit.author.name }}</td>
+                {% endif %}
+                    <td>{{ commit.committer_date }}</td>
+                    </tr>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    </table>
+{% endblock %}

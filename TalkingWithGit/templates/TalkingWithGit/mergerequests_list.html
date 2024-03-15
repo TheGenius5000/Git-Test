@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3>Merge requests from <b>{{ repository.name }}</b>:</h3>
+    <div>
+        <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+        <a href="{% url 'git-test.view_folder' pk=repository.id branch='main' relative_dir='home' %}" class="btn btn-primary mb-4">Back</a>
+    </div>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Source branch</th>
+            <th>Merged into</th>
+            <th>Author</th>
+            <th>Date merged</th>
+        </tr>
+        {% for merge_request in previous_merge_requests reversed %}
+            <tr>
+                <td>{{ merge_request.name }}</td>
+                <td>{{ merge_request.branch_source }}</td>
+                <td>{{ merge_request.branch_dest }}</td>
+                <td>{{ merge_request.opener }}</td>
+                <td>{{ merge_request.merge_date }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
