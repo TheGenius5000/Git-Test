@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h5>From: <b>{{ commit1_message }}</b></h5>
+    <form method="POST">
+        {% csrf_token %}
+        {{ commit2_form.as_p }}
+        <button type="submit" class="btn btn-primary my-5">Submit</button>
+    </form>
+    <h5>Commits after this one:</h5>
+    <table class="table">
+        <tr>
+            <th>Commit name</th>
+            <th>Author</th>
+            <th>Commit date</th>
+            <th>View the tree at this commit</th>
+        </tr>
+        {% for commit in commits_after_hash reversed %}
+            <tr {% if commit.merge %} class="table-success" {% endif %}>
+                <td>{{ commit.msg }}</td>
+                <td>{{ commit.author.name }}</td>
+                <td>{{ commit.committer_date }}</td>
+                <td><a href="{% url 'git-test.view_folder' pk=repository.id branch=commit.hash relative_dir='home' %}?headless" class="btn btn-primary">View</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

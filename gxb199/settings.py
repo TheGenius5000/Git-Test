@@ -47,6 +47,9 @@ INSTALLED_APPS = [
 
     #pip packages
     'git',
+    'pydriller',
+    'humanize',
+    'tinymce',
 
     # apps
     'home',
@@ -138,3 +141,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/smart/writer'
+
+TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/ccmez1lj1rki6vhsk9pxumkx8rssedjekad56c5cwz5qgntg/tinymce/6/tinymce.min.js'
+TINYMCE_COMPRESSOR = False
+
+REPOSITORIES_DIR = 'D:/git_repositories'

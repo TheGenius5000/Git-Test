@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load utils %}
+
+{% block content %}
+    <h1 class="align-center md-5">{{ repository.name }}</h1>
+    <a href="{% url 'git-test.detail' pk=repository.id %}" class="btn btn-secondary mb-4">Detail</a>
+    <h5 class="alert alert-warning">Your working index is not currently able to function at the moment because you need to decide what to keep and what to get rid of.</h5>
+    <form method="post" class="alert alert-info">
+        {% csrf_token %}
+        <div class="form-group"><div class="form-check text-start">
+        {% for unmerged_file in unmerged_files %}
+            <input class="form-check-input" type="checkbox" id="{{ forloop.counter }}" name="unmerged_file{{ forloop.counter }}" value="{{ unmerged_file }}">
+            <label class="form-check-label" for="{{ forloop.counter }}"><a href="{% url 'git-test.edit_file' pk=repository.id branch=repository.active_branch.name relative_dir=unmerged_file|filename_to_path filename=unmerged_file|file_in_path %}?nocheckout"> {{ unmerged_file }}</a></label><br>
+        {% endfor %}</div></div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+    {% if new_staged_files %}
+            <div class="alert alert-primary">
+                <div class="d-flex align-items-center flex-column p-2 mb-4">
+                    <h3>The following files are staged and ready for commit:</h3>
+                    <form method="post" class="d-flex flex-row gap-lg-1">
+                        {% csrf_token %}
+                        {{ commit_changes_form.as_p }}
+                        <button type="submit" name="commit" class="btn btn-success mb-2">Commit</button>
+                    </form>
+                    <form method="post" class="d-flex flex-row gap-lg-1">
+                        {% csrf_token %}
+                        {{ stash_changes_form.as_p }}
+                        <button type="submit" name="stash-save" class="btn btn-primary">Stash</button>
+                    </form>
+                </div>
+{#                <strong>There is no stashing at the moment, you'll have to commit these changes on this branch or not be able to switch branches.</strong>#}
+                <p>(Absolute paths)</p>
+                <ul class="list-group">
+                    {% for staged_file in new_staged_files %}
+                        <li class="list-group-item"><a href="{% url 'git-test.edit_file' pk=repository.id branch=branch relative_dir=staged_file|filename_to_path filename=staged_file|file_in_path %}">{{ staged_file }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        {% endif %}
+{% endblock %}
